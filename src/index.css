@@ -21,3 +21,27 @@ body {
   height: 100%;
 }
 
+/* SVG hex hover "lift" without React rerender.
+   In SVG paint order is DOM order, so the component also moves hovered <g>
+   to the end of the layer to emulate z-index. */
+.hex-ground-cell {
+  transition: transform 180ms ease, filter 180ms ease;
+  filter: drop-shadow(0px 10px 10px rgba(0, 0, 0, 0.35));
+
+  /* important for CSS-transform on SVG elements */
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.hex-ground-cell[data-clickable="false"] {
+  cursor: default;
+}
+
+.hex-ground-cell[data-clickable="true"] {
+  cursor: pointer;
+}
+
+.hex-ground-cell[data-clickable="true"]:hover {
+  transform: translateY(-10px);
+}
+

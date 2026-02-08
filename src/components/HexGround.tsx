@@ -4,8 +4,8 @@ import horseImage from "../assets/horse.png";
 import {
   useCallback,
   useMemo,
+  useRef,
   useState,
-  type CSSProperties,
   type MouseEvent,
 } from "react";
 import { Modal } from "./modal";
@@ -40,8 +40,6 @@ const hexArray = grid.toArray();
 export const HexGround = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [polygonChosen, setPolygonChosen] = useState(false);
-
-  const [hoveredHex, setHoveredHex] = useState<number | null>(null);
   const [unitPosition, setUnitPosition] = useState<{
     q: number;
     r: number;
@@ -57,43 +55,35 @@ export const HexGround = () => {
     setDialogOpen(true);
   }
 
-  const HOVER_LIFT_Y = 10;
+  // В SVG "z-index" не работает как в HTML: порядок отрисовки зависит от DOM-очереди.
+  // Чтобы поднять гекс над соседями БЕЗ React-state и перерендера остальных ячеек,
+  // на hover мы временно переносим текущий <g> в конец слоя, а при уходе мыши
+  // возвращаем его на место по data-index. = useRef<SVGGElement | null>(null);
 
-  function getHexGroupStyle(isHovered: boolean): CSSProperties {
-    return {
-      cursor: "pointer",
-      transform: isHovered
-        ? `translateY(-${HOVER_LIFT_Y}px)`
-        : "translateY(0px)",
-      transition: "transform 180ms ease, filter 180ms ease",
-      filter: "drop-shadow(0px 10px 10px rgba(0,0,0,0.35))",
+  const bringToFront = useCallback((el: SVGGElement) => {
+    const layer = hexLayerRef.current;
+    if (!layer) return;
+    // appendChild перемещает существующий узел, не клонируя его
+    layer.appendChild(el);
+  }, []);
 
-      // важно для CSS-transform у SVG элементов
-      transformBox: "fill-box",
-      transformOrigin: "center",
-    };
-  }
+  const restoreOrder = useCallback((el: SVGGElement) => {
+    const layer = hexLayerRef.current;
+    if (!layer) return;
 
-  const handleHexMouseEnter = (index: number) => {
-    // mouseenter не всплывает как mouseover, поэтому меньше лишних событий;
-    // + не обновляем state, если hover уже на этом hex
-    setHoveredHex((prev) => (prev === index ? prev : index));
-  };
+    const idxRaw = el.dataset.index;
+    if (!idxRaw) return;
+    const idx = Number(idxRaw);
+    if (!Number.isFinite(idx)) return;
 
-  const handleHexMouseLeave = (index: number) => {
-    setHoveredHex((prev) => (prev === index ? null : prev));
-  };
+    const children = Array.from(layer.children) as SVGGElement[];
+    const before = children.find((c) => {
+      const cIdx = Number(c.dataset.index);
+      return Number.isFinite(cIdx) && cIdx > idx;
+    });
 
-  const ordered = useMemo(() => {
-    if (hoveredHex === null)
-      return hexArray.map((hex, index) => ({ hex, index }));
-
-    const all = hexArray.map((hex, index) => ({ hex, index }));
-    return [
-      ...all.filter(({ index }) => index !== hoveredHex),
-      { hex: hexArray[hoveredHex], index: hoveredHex },
-    ];
-  }, [hoveredHex, hexArray]);
+    layer.insertBefore(el, before ?? null);
+  }, []);
 
   const randomPolygons = useMemo(() => getRandomPolygon(rows), [rows]);
 
@@ -125,88 +115,89 @@ export const HexGround = () => {
         width="100%"
         height="100%"
       >
-        {ordered.map(({ hex, index }) => {
-          const points = hex.corners.map(({ x, y }) => `${x},${y}`).join(" ");
-          const isHovered = hoveredHex === index;
-          const bbox = getPolygonBBox(hex.corners);
-          const { width: tileWidth, height: tileHeight } = bbox;
-          const tileX = hex.x - tileWidth / 2;
-          const tileY = hex.y - tileHeight / 2;
+        <g ref={hexLayerRef}>
+          {hexArray.map((hex, index) => {
+            const points = hex.corners.map(({ x, y }) => `${x},${y}`).join(" ");
+            const bbox = getPolygonBBox(hex.corners);
+            const { width: tileWidth, height: tileHeight } = bbox;
+            const tileX = hex.x - tileWidth / 2;
+            const tileY = hex.y - tileHeight / 2;
 
-          const { centerX, centerY, unitSize, clipId, hasUnit } =
-            getUnitCoordinates(hex, unitPosition, index);
+            const { centerX, centerY, unitSize, clipId, hasUnit } =
+              getUnitCoordinates(hex, unitPosition, index);
 
-          return (
-            <g
-              key={`${hex.q}-${hex.r}-${index}`}
-              style={getHexGroupStyle(isHovered)}
-              onMouseEnter={() =>
-                gameStarted && getIsClickablePolygons(index)
-                  ? handleHexMouseEnter(index)
-                  : null
-              }
-              onMouseLeave={() =>
-                gameStarted && getIsClickablePolygons(index)
-                  ? handleHexMouseLeave(index)
-                  : null
-              }
-              onClick={(e: MouseEvent<SVGGElement>) => {
-                if (gameStarted && getIsClickablePolygons(index)) {
+            const clickable = gameStarted && getIsClickablePolygons(index);
+
+            return (
+              <g
+                key={`${hex.q}-${hex.r}-${index}`}
+                className="hex-ground-cell"
+                data-index={index}
+                data-clickable={clickable ? "true" : "false"}
+                onPointerEnter={(e) => {
+                  if (!clickable) return;
+                  bringToFront(e.currentTarget);
+                }}
+                onPointerLeave={(e) => {
+                  if (!clickable) return;
+                  restoreOrder(e.currentTarget);
+                }}
+                onClick={(e: MouseEvent<SVGGElement>) => {
+                  if (!clickable) return;
                   setPolygonChosen(true);
                   handleHexClick(e, hex.q, hex.r);
-                }
-              }}
-            >
-              {/* ГЕКС — ОСНОВАНИЕ */}
-              <polygon
-                points={points}
-                fill="transparent"
-                // fill="#d6e6a3"
-                // stroke="#000"
-                // strokeWidth={1}
-              />
-
-              {/* КАРТИНКА — ВЫХОДИТ ЗА ПРЕДЕЛЫ ГЕКСА */}
-              <image
-                href={randomPolygons[index].image}
-                width={tileWidth + 5}
-                height={
-                  randomPolygons[index].type === "rocks"
-                    ? tileHeight + 8
-                    : tileHeight + 5
-                }
-                x={Math.floor(tileX)}
-                y={
-                  randomPolygons[index].type === "rocks"
-                    ? Math.floor(tileY - 3)
-                    : Math.floor(tileY)
-                }
-                preserveAspectRatio="none"
-                pointerEvents="none"
-                style={{
-                  opacity:
-                    gameStarted && getIsClickablePolygons(index) ? 1 : 0.75,
                 }}
-              />
+              >
+                {/* ГЕКС — ОСНОВАНИЕ */}
+                <polygon
+                  points={points}
+                  fill="transparent"
+                  // fill="#d6e6a3"
+                  // stroke="#000"
+                  // strokeWidth={1}
+                />
 
-              {hasUnit && (
+                {/* КАРТИНКА — ВЫХОДИТ ЗА ПРЕДЕЛЫ ГЕКСА */}
                 <image
-                  href={horseImage}
-                  x={centerX - unitSize / 2}
-                  y={centerY - unitSize / 2}
-                  width={unitSize}
-                  height={unitSize}
-                  preserveAspectRatio="xMidYMid meet"
-                  clipPath={`url(#${clipId})`}
+                  href={randomPolygons[index].image}
+                  width={tileWidth + 5}
+                  height={
+                    randomPolygons[index].type === "rocks"
+                      ? tileHeight + 8
+                      : tileHeight + 5
+                  }
+                  x={Math.floor(tileX)}
+                  y={
+                    randomPolygons[index].type === "rocks"
+                      ? Math.floor(tileY - 3)
+                      : Math.floor(tileY)
+                  }
+                  preserveAspectRatio="none"
                   pointerEvents="none"
                   style={{
-                    filter: "drop-shadow(0px 6px 6px rgba(0,0,0,0.35))",
+                    opacity: clickable ? 1 : 0.75,
                   }}
                 />
-              )}
-            </g>
-          );
-        })}
+
+                {hasUnit && (
+                  <image
+                    href={horseImage}
+                    x={centerX - unitSize / 2}
+                    y={centerY - unitSize / 2}
+                    width={unitSize}
+                    height={unitSize}
+                    preserveAspectRatio="xMidYMid meet"
+                    clipPath={`url(#${clipId})`}
+                    pointerEvents="none"
+                    style={{
+                      filter: "drop-shadow(0px 6px 6px rgba(0,0,0,0.35))",
+                    }}
+                  />
+                )}
+              </g>
+            );
+          })}
+        </g>
       </svg>
 
       {!gameStarted && (
