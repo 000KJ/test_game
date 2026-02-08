@@ -211,7 +211,7 @@ export const HexGround = () => {
           <button
             onClick={() => setGameStarted(true)}
             type="button"
-            className="flex w-[60vw] max-h-[55px] aspect-[229/56] 
+            className="flex w-[60vw] max-w-[380px] max-h-[55px] aspect-[229/56] 
             items-center justify-center gap-[10px] 
             rounded-[16px] border-4 border-white bg-[#1E802A] 
             text-white 
