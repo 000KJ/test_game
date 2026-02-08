@@ -95,7 +95,7 @@ export function Modal({ open, onClose, origin }: Props) {
 
       <div
         className={[
-          "relative flex h-auto w-[80vw] max-h-[calc(var(--app-height,100vh)-32px)] flex-col gap-[10px] overflow-y-auto rounded-[36px] bg-[#00000099] p-4 text-white shadow-[4px_4px_9px_0px_#00000073] backdrop-blur-[10px]",
+          "relative flex h-auto w-[80vw] max-w-[400px] max-h-[calc(var(--app-height,100vh)-32px)] flex-col gap-[10px] overflow-y-auto rounded-[36px] bg-[#00000099] p-4 text-white shadow-[4px_4px_9px_0px_#00000073] backdrop-blur-[10px]",
           "will-change-transform",
         ].join(" ")}
         style={{
@@ -116,15 +116,7 @@ export function Modal({ open, onClose, origin }: Props) {
         />
         <div>
           <div
-            className="mb-3"
-            style={{
-              fontFamily:
-                "Non Bureau Extended, system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
-              fontWeight: 500,
-              fontSize: 13,
-              lineHeight: "100%",
-              letterSpacing: "0%",
-            }}
+            className="mb-3 text-left text-[13px] leading-none tracking-normal"
           >
             Вопрос {currentQuestion} из {totalQuestions}
           </div>

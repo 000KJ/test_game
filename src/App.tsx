@@ -1,13 +1,29 @@
-import { HexGrid } from "./components/HexGrid";
 import bgImage from "./assets/bg.png";
+import { AppLoader } from "./components/AppLoader";
 import { HexGround } from "./components/HexGround";
+import { APP_IMAGE_URLS } from "./appImages";
+import { usePreloadImages } from "./hooks/usePreloadImages";
 import { useAppHeightCssVar } from "./viewport";
+import { useEffect, useState } from "react";
 
 export default function App() {
   useAppHeightCssVar();
 
+  const { isReady, progress, loaded, total } = usePreloadImages(APP_IMAGE_URLS);
+  const [showLoader, setShowLoader] = useState(true);
+
+  useEffect(() => {
+    if (!isReady) return;
+    // tiny delay to avoid "flash" on fast cache hits
+    const t = window.setTimeout(() => setShowLoader(false), 200);
+    return () => window.clearTimeout(t);
+  }, [isReady]);
+
   return (
     <div className="relative min-h-[var(--app-height,100vh)] w-full overflow-hidden overscroll-none">
+      {showLoader && (
+        <AppLoader progress={progress} loaded={loaded} total={total} />
+      )}
       <div
         className="absolute inset-0 z-0"
         style={{

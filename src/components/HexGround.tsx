@@ -1,13 +1,7 @@
 import { defineHex, Grid } from "honeycomb-grid";
 import horseImage from "../assets/horse.png";
 
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent,
-} from "react";
+import { useCallback, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Modal } from "./modal";
 import {
   getIsClickablePolygons,
@@ -97,12 +91,6 @@ export const HexGround = () => {
           style={{
             top: "calc(var(--app-height, 100vh) * 0.05)",
             opacity: 1,
-            fontFamily:
-              "Non Bureau, system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
-            fontWeight: 500,
-            fontSize: 24,
-            lineHeight: "100%",
-            letterSpacing: "0%",
           }}
         >
           Тыкни по гексу,
@@ -182,19 +170,34 @@ export const HexGround = () => {
                 />
 
                 {hasUnit && (
-                  <image
-                    href={horseImage}
-                    x={centerX - unitSize / 2}
-                    y={centerY - unitSize / 2}
-                    width={unitSize}
-                    height={unitSize}
-                    preserveAspectRatio="xMidYMid meet"
-                    clipPath={`url(#${clipId})`}
-                    pointerEvents="none"
-                    style={{
-                      filter: "drop-shadow(0px 6px 6px rgba(0,0,0,0.35))",
-                    }}
-                  />
+                  <>
+                    {/* ВЫБРАННЫЙ ГЕКС — ОБВОДКА + ЗЕЛЕНОЕ СВЕЧЕНИЕ */}
+                    {/* <polygon
+                      points={points}
+                      fill="none"
+                      stroke="#FFFFFF"
+                      strokeWidth={5.18}
+                      strokeLinejoin="round"
+                      pointerEvents="none"
+                      style={{
+                        filter:
+                          "drop-shadow(0px 0px 6px #84d642) drop-shadow(0px 0px 12px #84d642)",
+                      }}
+                    /> */}
+                    <image
+                      href={horseImage}
+                      x={centerX - unitSize / 2}
+                      y={centerY - unitSize / 2}
+                      width={unitSize}
+                      height={unitSize}
+                      preserveAspectRatio="xMidYMid meet"
+                      clipPath={`url(#${clipId})`}
+                      pointerEvents="none"
+                      style={{
+                        filter: "drop-shadow(0px 6px 6px rgba(0,0,0,0.35))",
+                      }}
+                    />
+                  </>
                 )}
               </g>
             );
@@ -207,15 +210,10 @@ export const HexGround = () => {
           <button
             onClick={() => setGameStarted(true)}
             type="button"
-            className="flex w-[60vw] aspect-[229/56] 
+            className="flex w-[60vw] max-h-[55px] aspect-[229/56] 
             items-center justify-center gap-[10px] 
             rounded-[16px] border-4 border-white bg-[#1E802A] 
-            font-family: 'Non Bureau';
-            font-style: normal;
-            font-weight: 500;
-            font-size: 24px;
-            line-height: 100%;
-            text-base font-semibold leading-none text-white 
+            text-white 
             shadow-[4px_4px_9px_0px_rgba(0,0,0,0.45)]
           "
           >

@@ -30,7 +30,7 @@ export function Question({
 
   return (
     <fieldset className={className}>
-      <legend className="mb-3 text-xs text-neutral-300 sm:mb-4 sm:text-sm">
+      <legend className="mb-3 text-left text-[16px] font-medium leading-none tracking-normal text-neutral-300">
         {question}
       </legend>
 
@@ -57,7 +57,7 @@ export function Question({
                 className={[
                   "flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 sm:min-h-[49px] sm:gap-[10px] sm:px-[21px] sm:py-[13px]",
                   "bg-white/20 opacity-100",
-                  "text-[13px] leading-snug text-white/90 sm:text-sm sm:leading-normal",
+                  "text-[16px] leading-snug text-white/90",
                   "cursor-pointer select-none",
                   "transition-colors",
                   "hover:bg-white/25",

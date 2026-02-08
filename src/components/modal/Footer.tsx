@@ -34,7 +34,7 @@ export const Footer: FC<Props> = ({
         disabled={!selectedAnswer}
         className={[
           "flex h-[49px] w-full items-center justify-center gap-[10px] rounded-2xl border-2 border-white px-[21px] py-[13px]",
-          "bg-[#248BBF] text-white",
+          "bg-[#248BBF] text-white text-[16px]",
           "transition-opacity",
           !selectedAnswer ? "opacity-50 cursor-not-allowed" : "opacity-100",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40",

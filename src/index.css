@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global font: Non Bureau (Medium = weight 500).
+   Note: `font-style: Medium` is not valid CSS; Medium is represented by weight 500.
+   We intentionally only reference local fonts here so the build doesn't break
+   when font files are not yet added to the repo. */
+@font-face {
+  font-family: "Non Bureau";
+  src: local("Non Bureau"), local("NonBureau"), local("Non Bureau Medium");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Small ergonomic defaults */
 :root {
   --app-height: 100vh;
@@ -15,6 +27,16 @@ body {
 /* App is a full-screen game; prevent page scroll/bounce. */
 body {
   overflow: hidden;
+  font-family: "Non Bureau", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 24px;
+  /* leading-trim is not widely supported yet; keep as a no-op default */
+  leading-trim: none;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
 }
 
 #root {
