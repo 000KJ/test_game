@@ -190,6 +190,7 @@ export const HexGround = () => {
                       y={centerY - unitSize / 2}
                       width={unitSize}
                       height={unitSize}
+                      transform={`translate(${centerX} 0) scale(-1 1) translate(${-centerX} 0)`}
                       preserveAspectRatio="xMidYMid meet"
                       clipPath={`url(#${clipId})`}
                       pointerEvents="none"
