@@ -60,6 +60,8 @@ export const HexGround = () => {
   // на hover мы временно переносим текущий <g> в конец слоя, а при уходе мыши
   // возвращаем его на место по data-index. = useRef<SVGGElement | null>(null);
 
+  const hexLayerRef = useRef<SVGGElement | null>(null);
+
   const bringToFront = useCallback((el: SVGGElement) => {
     const layer = hexLayerRef.current;
     if (!layer) return;
