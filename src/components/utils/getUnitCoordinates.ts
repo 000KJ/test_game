@@ -15,9 +15,10 @@ export const getUnitCoordinates = (
   const minY = Math.min(...ys);
   const maxY = Math.max(...ys);
   const centerX = (minX + maxX) / 2;
-  const centerY = (minY + maxY) / 2.1;
-  const hexWidth = maxX - minX;
   const hexHeight = maxY - minY;
+  // Чуть приподнимаем юнита относительно геометрического центра (масштабируемо от размера гекса)
+  const centerY = (minY + maxY) / 2 - hexHeight * 0.05;
+  const hexWidth = maxX - minX;
   const unitSize = Math.min(hexWidth, hexHeight) * 0.9;
 
   return {
